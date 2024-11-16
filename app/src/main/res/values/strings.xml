@@ -15,4 +15,9 @@
     <string name="create_account">Create Account</string>
     <string name="signup">Signup</string>
     <string name="Login">Login</string>
+    <string name="edit">Edit</string>
+    <string name="logout">Logout</string>
+    <string name="log_out">log Out</string>
+    <string name="Log_out">Log Out</string>
+    <string name="delete_account">Delete Account</string>
 </resources>

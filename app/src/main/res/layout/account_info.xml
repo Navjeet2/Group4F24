@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#DCDCDC"
+    tools:context=".MainActivity">
+
+    <LinearLayout
+        android:id="@+id/profile_icon"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical">
+
+
+        <ImageView
+            android:layout_width="250dp"
+            android:layout_height="250dp"
+            android:layout_marginTop="13dp"
+            android:src="@drawable/profile" />
+
+        <TextView
+            android:id="@+id/Account_Detail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Account Detail"
+            android:textColor="#000000"
+            android:textSize="25sp"
+            android:textStyle="bold" />
+
+        <EditText
+            android:layout_width="350dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="26dp"
+            android:minHeight="48dp"
+            android:background="@drawable/border"
+            android:hint="@string/username"
+            android:inputType="text"
+            android:padding="10dp"
+            android:textColorHint="#686666"
+            android:textSize="20sp" />
+
+
+        <TextView
+            android:id="@+id/edit_Text_View"
+            android:layout_width="40dp"
+            android:layout_height="20dp"
+            android:layout_marginEnd="150dp"
+            android:gravity="start"
+            android:text="@string/edit"
+            android:textColor="#0774C5"
+            android:textSize="16sp"/>
+
+        <EditText
+            android:id="@+id/Email"
+            android:layout_width="350dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:background="@drawable/border"
+            android:hint="@string/email"
+            android:inputType="textEmailAddress"
+            android:minHeight="48dp"
+            android:padding="10dp"
+            android:textColorHint="#686666"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/edit_Text_View2"
+            android:layout_width="40dp"
+            android:layout_height="20dp"
+            android:layout_marginEnd="150dp"
+            android:gravity="start"
+            android:text="@string/edit"
+            android:textColor="#0774C5"
+            android:textSize="16sp"/>
+
+
+        <EditText
+            android:layout_width="350dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:minHeight="48dp"
+            android:background="@drawable/border"
+            android:hint="@string/password"
+            android:inputType="textPassword"
+            android:padding="10dp"
+            android:textColorHint="#686666"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/edit_Text_View3"
+            android:layout_width="40dp"
+            android:layout_height="20dp"
+            android:layout_marginEnd="150dp"
+            android:gravity="start"
+            android:text="@string/edit"
+            android:textColor="#0774C5"
+            android:textSize="16sp"/>
+
+
+        <TextView
+            android:id="@+id/logout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="35dp"
+            android:layout_marginStart="20dp"
+            android:text="@string/Log_out"
+            android:textColor="#1D1D1D"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/delete"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:layout_marginStart="20dp"
+            android:text="@string/delete_account"
+            android:textColor="#D52641"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+
+
+    </LinearLayout>
+
+</RelativeLayout>
