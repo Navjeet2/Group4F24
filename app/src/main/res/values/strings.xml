@@ -20,4 +20,7 @@
     <string name="log_out">log Out</string>
     <string name="Log_out">Log Out</string>
     <string name="delete_account">Delete Account</string>
+    <string name="enter_your_email">Enter your email</string>
+    <string name="send_verification_code">Send Verification Code</string>
+    <string name="verify">Verify</string>
 </resources>

@@ -1,30 +1,41 @@
 package com.example.group4f24;
 
+import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.appcompat.app.AppCompatActivity;
+import com.example.group4f24.data.DatabaseHelper;
+import com.example.group4f24.util.HashingHelper;
 
-public class MainActivity extends AppCompatActivity {
+public class UserRegistrationActivity extends AppCompatActivity {
 
     private EditText usernameField, emailField, passwordField, confirmPasswordField;
-    private Button registerButton;
+    protected Button registerButton;
     private DatabaseHelper databaseHelper;
 
+
+    @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        databaseHelper = new DatabaseHelper(this);
+
         usernameField = findViewById(R.id.Username);
         emailField = findViewById(R.id.Email);
         passwordField = findViewById(R.id.Enter_Password);
         confirmPasswordField = findViewById(R.id.Confirm_Password);
-        registerButton = findViewById(R.id.Register);
+        registerButton = findViewById(R.id.btnRegister);
+        TextView loginText = findViewById(R.id.Login);
 
-        databaseHelper = new DatabaseHelper(this);
+        loginText.setOnClickListener(v -> navigateToLogin());
+
+
 
         registerButton.setOnClickListener(v -> registerUser());
     }
@@ -59,5 +70,10 @@ public class MainActivity extends AppCompatActivity {
         } else {
             Toast.makeText(this, "Registration failed!", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void navigateToLogin(){
+        Intent intent = new Intent(UserRegistrationActivity.this, com.example.group4f24.LoginActivity.class);
+        startActivity(intent);
     }
 }

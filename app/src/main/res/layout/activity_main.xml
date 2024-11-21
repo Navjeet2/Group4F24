@@ -6,8 +6,8 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#DCDCDC"
-    tools:context=".MainActivity">
+    android:background="#D9EAFF"
+    tools:context=".UserRegistrationActivity">
 
     <LinearLayout
         android:id="@+id/social_icons"
@@ -29,7 +29,7 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:text="@string/create_account"
-            android:textColor="#000000"
+            android:textColor="#050505"
             android:textSize="35sp"
             android:textStyle="bold" />
 
@@ -43,7 +43,7 @@
             android:hint="@string/Username"
             android:inputType="text"
             android:padding="10dp"
-            android:textColorHint="#686666"
+            android:textColorHint="#454545"
             android:textSize="20sp" />
 
         <EditText
@@ -56,7 +56,7 @@
             android:inputType="textEmailAddress"
             android:minHeight="48dp"
             android:padding="10dp"
-            android:textColorHint="#686666"
+            android:textColorHint="#454545"
             android:textSize="20sp" />
 
         <EditText
@@ -69,10 +69,11 @@
             android:inputType="textPassword"
             android:minHeight="48dp"
             android:padding="10dp"
-            android:textColorHint="#686666"
+            android:textColorHint="#454545"
             android:textSize="20sp" />
 
         <EditText
+            android:id="@+id/Confirm_Password"
             android:layout_width="350dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="26dp"
@@ -81,12 +82,13 @@
             android:hint="@string/confirm_password"
             android:inputType="textPassword"
             android:padding="10dp"
-            android:textColorHint="#686666"
+            android:textColorHint="#454545"
             android:textSize="20sp" />
 
         <androidx.appcompat.widget.AppCompatButton
-            android:layout_width="199dp"
-            android:layout_height="50dp"
+            android:id="@+id/btnRegister"
+            android:layout_width="150dp"
+            android:layout_height="48dp"
             android:layout_marginTop="26dp"
             android:background="@drawable/button_shape"
             android:text="@string/register"
@@ -120,7 +122,7 @@
                 android:layout_marginTop="20dp"
                 android:gravity="center"
                 android:text="@string/login"
-                android:textColor="#2A9AD7"
+                android:textColor="#0040ED"
                 android:textSize="15sp"
                 android:textStyle="bold" />
         </LinearLayout>
