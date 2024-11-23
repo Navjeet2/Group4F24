@@ -23,4 +23,7 @@
     <string name="enter_your_email">Enter your email</string>
     <string name="send_verification_code">Send Verification Code</string>
     <string name="verify">Verify</string>
+    <string name="welcome_to_driveranalytics">Welcome To DriverAnalytics!</string>
+    <string name="score">Score</string>
+    <string name="average_overall_score">Average Overall Score</string>
 </resources>

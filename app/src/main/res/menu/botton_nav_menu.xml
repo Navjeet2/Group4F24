@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+        <item
+            android:id="@+id/menu_dashboard"
+            android:title="Dashboard" />
+        <item
+            android:id="@+id/menu_my_trips"
+            android:title="My Trips" />
+        <item
+            android:id="@+id/menu_settings"
+            android:title="Profile" />
+</menu>
