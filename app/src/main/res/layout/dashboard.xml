@@ -29,7 +29,7 @@
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/score_circle"
+            android:id="@+id/average_score_circle"
             android:layout_width="150dp"
             android:layout_height="150dp"
             android:layout_marginTop="30dp"

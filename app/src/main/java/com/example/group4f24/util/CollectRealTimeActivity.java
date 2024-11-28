@@ -1,118 +1,220 @@
 package com.example.group4f24.util;
 
-import android.database.Cursor;
+import android.Manifest;
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
 import com.example.group4f24.R;
-import com.example.group4f24.data.DatabaseHelper;
-
 
 public class CollectRealTimeActivity extends AppCompatActivity {
 
-    private DatabaseHelper dbHelper;
-    private TextView startTimeTextView;
-    private TextView endTimeTextView;
-    private TextView averageSpeedTextView;
-    private TextView brakingScoreTextView;
-    private TextView speedingScoreTextView;
-    private TextView accelerationScoreTextView;
-    private TextView corneringScoreTextView;
-    private TextView overallScoreTextView;
+    private LocationManager locationManager;
+    private double previousSpeed = 0;
+    private long previousTime = 0;
+    private double previousLatitude = 0;
+    private double previousLongitude = 0;
+    private double totalAcceleration = 0;
+    private double totalBraking = 0;
+    private double totalCornering = 0;
+    private int tripCount = 0;
+    private double totalScore = 0;
+    private Button startTripButton;
+    private Button endTripButton;
+    private TextView scoreCircleTextView;
+    private TextView averageScoreTextView, brakingTextView, speedingTextView, accelerationTextView, corneringTextView;
+    private double totalSpeeding = 0;  // To accumulate speeding speed values
+    private int speedingCount = 0;  // To count how many times the user was speeding
+    private final double SPEEDING_THRESHOLD = 120.0;
 
-    private int currentUserId;
-    private long currentTripId;
+    private boolean isTripActive = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.dashboard);
-        setContentView(R.layout.homepage);
-        setContentView(R.layout.first_page);
+        // Set initial layout for the start trip
+        setContentView(R.layout.first_page);  // This layout should have the Start Trip button
 
-        dbHelper = new DatabaseHelper(this);
+        // Initialize the Start Trip button
+        startTripButton = findViewById(R.id.start_trip);
 
-        // Initialize views
-        startTimeTextView = findViewById(R.id.start_time_text);
-        endTimeTextView = findViewById(R.id.end_time_text);
-        averageSpeedTextView = findViewById(R.id.average_speed_text);
-        brakingScoreTextView = findViewById(R.id.braking_score_text);
-        speedingScoreTextView = findViewById(R.id.speeding_score_text);
-        accelerationScoreTextView = findViewById(R.id.acceleration_score_text);
-        corneringScoreTextView = findViewById(R.id.cornering_score_text);
-        overallScoreTextView = findViewById(R.id.overall_score_text);
+        // Set up the click listener for the "Start Trip" button
+        startTripButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Start collecting data when Start Trip is clicked
+                startCollectingRealTimeData();
 
-        // Assuming `currentUserId` is retrieved when the user logs in
-        currentUserId = 1; // Example user id, replace with dynamic login logic
+                // Switch to the homepage layout (with End Trip button)
+                setContentView(R.layout.homepage);  // This layout should have the End Trip button
 
-        // Start a new trip
-        startTrip();
+                // Find the score_circle TextView
+                scoreCircleTextView = findViewById(R.id.score_circle);
+                // Initialize the End Trip button
+                endTripButton = findViewById(R.id.End_trip);
+
+                // Set up the click listener for the "End Trip" button
+                endTripButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        // End the trip and calculate the score
+                        endTrip();
+                    }
+                });
+            }
+        });
     }
 
-    // Method to start a new trip
-    private void startTrip() {
-        String startTime = "2024-11-21 10:00:00"; // Use current time in real case
-        currentTripId = dbHelper.startTrip(currentUserId, startTime);
-        startTimeTextView.setText(startTime);
+    private void startCollectingRealTimeData() {
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+        // Check if permission is granted
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+            return;
+        }
+
+       // Request location updates only if the trip has started
+        if (!isTripActive) {
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 10, locationListener);
+            isTripActive = true;  // Mark the trip as active
+            Toast.makeText(CollectRealTimeActivity.this, "Trip Started", Toast.LENGTH_SHORT).show();
+        }
     }
 
-    // Method to end the current trip and calculate scores
+    private LocationListener locationListener = new LocationListener() {
+        @Override
+        public void onLocationChanged(Location location) {
+            // Real-time data collection
+            double currentSpeed = location.getSpeed(); // speed in meters per second
+            long currentTime = System.currentTimeMillis();
+            double currentLatitude = location.getLatitude();
+            double currentLongitude = location.getLongitude();
+
+            // Convert speed to km/h (multiply by 3.6)
+            double speedInKmh = currentSpeed * 3.6;
+
+            // Update the TextView with the current speed
+            if (scoreCircleTextView != null) {
+                scoreCircleTextView.setText(String.format("%.1f km/h", speedInKmh));  // Display speed in km/h
+            }
+
+            // Calculate speeding events (if the speed exceeds the threshold)
+            if (speedInKmh > SPEEDING_THRESHOLD) {
+                totalSpeeding += speedInKmh;
+                speedingCount++;
+            }
+
+            // Calculate acceleration
+            if (previousTime != 0) {
+                double timeDiff = (currentTime - previousTime) / 1000.0; // time difference in seconds
+                double speedDiff = currentSpeed - previousSpeed; // speed difference in m/s
+                double acceleration = speedDiff / timeDiff; // acceleration in m/s²
+
+                // Calculate braking (negative acceleration)
+                if (acceleration < -0.5) {
+                    totalBraking += acceleration;
+                }
+
+                // Calculate cornering (using change in direction and speed)
+                if (currentLatitude != previousLatitude && currentLongitude != previousLongitude) {
+                    double directionChange = Math.abs(currentLatitude - previousLatitude) + Math.abs(currentLongitude - previousLongitude);
+                    double cornering = directionChange / timeDiff; // approximate cornering based on direction change
+                    totalCornering += cornering;
+                }
+
+                totalAcceleration += acceleration;
+                tripCount++;  // Increment trip count for each location update
+            }
+
+            // Update previous values for next calculation
+            previousSpeed = currentSpeed;
+            previousTime = currentTime;
+            previousLatitude = currentLatitude;
+            previousLongitude = currentLongitude;
+
+            // Show real-time speed (for example in a Toast message)
+            //Toast.makeText(CollectRealTimeActivity.this, "Speed: " + currentSpeed + " m/s", Toast.LENGTH_SHORT).show();
+        }
+
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+        }
+
+        @Override
+        public void onProviderEnabled(String provider) {
+        }
+
+        @Override
+        public void onProviderDisabled(String provider) {
+        }
+    };
+
+    // Method to stop the trip and calculate the final score
     private void endTrip() {
-        // Example data for ending the trip
-        String endTime = "2024-11-21 11:00:00"; // Use current time in real case
-        double avgSpeed = 60.5;
-        double brakingScore = 75.0;
-        double speedingScore = 85.0;
-        double accelerationScore = 80.0;
-        double corneringScore = 70.0;
-
-        boolean success = dbHelper.endTrip((int) currentTripId, endTime, avgSpeed, brakingScore, speedingScore, accelerationScore, corneringScore);
-
-        if (success) {
-            // Update the UI to reflect the trip's results
-            endTimeTextView.setText(endTime);
-            averageSpeedTextView.setText(String.valueOf(avgSpeed));
-            brakingScoreTextView.setText(String.valueOf(brakingScore));
-            speedingScoreTextView.setText(String.valueOf(speedingScore));
-            accelerationScoreTextView.setText(String.valueOf(accelerationScore));
-            corneringScoreTextView.setText(String.valueOf(corneringScore));
-
-            double overallScore = (brakingScore + speedingScore + accelerationScore + corneringScore) / 4.0;
-            overallScoreTextView.setText(String.valueOf(overallScore));
-
-        } else {
-            // Handle the error if the trip could not be ended
+        if (!isTripActive) {
+            Toast.makeText(CollectRealTimeActivity.this, "No trip is active", Toast.LENGTH_SHORT).show();
+            return;
         }
+
+        // Stop collecting data
+        locationManager.removeUpdates(locationListener);
+        isTripActive = false;
+
+        // Calculate the average acceleration, braking, and cornering
+        double averageAcceleration = totalAcceleration / tripCount;
+        double averageBraking = totalBraking / tripCount;
+        double averageCornering = totalCornering / tripCount;
+
+        double averageSpeeding = (speedingCount > 0) ? totalSpeeding / speedingCount : 0;
+
+        // Calculate the overall score (this is just an example formula)
+        double score = calculateScore(averageAcceleration, averageBraking, averageCornering);
+        totalScore += score;
+
+        // Show the final score in a Toast (or navigate to the Dashboard page)
+        Toast.makeText(CollectRealTimeActivity.this, "Trip Ended. Your Score: " + score, Toast.LENGTH_LONG).show();
+
+        setContentView(R.layout.dashboard);
+        averageScoreTextView = findViewById(R.id.average_score_circle);
+        brakingTextView = findViewById(R.id.braking_circle);
+        speedingTextView = findViewById(R.id.speeding_circle);
+        accelerationTextView = findViewById(R.id.accelerate_circle);
+        corneringTextView = findViewById(R.id.cornering_circle);
+
+
+        // Set the calculated values on the dashboard
+        averageScoreTextView.setText(String.format("%.1f", score));
+        brakingTextView.setText(String.format("%.1f", averageBraking));
+        speedingTextView.setText(String.format("%.1f", averageSpeeding));
+        accelerationTextView.setText(String.format("%.1f", averageAcceleration));
+        corneringTextView.setText(String.format("%.1f", averageCornering));
+
     }
 
-    // Method to retrieve trip data for the dashboard
-    private void loadTripData() {
-        Cursor cursor = dbHelper.getDashboardData(currentUserId);
-        if (cursor != null && cursor.moveToFirst()) {
-            do {
-                String startTime = cursor.getString(cursor.getColumnIndex(DatabaseHelper.COLUMN_START_TIME));
-                String endTime = cursor.getString(cursor.getColumnIndex(DatabaseHelper.COLUMN_END_TIME));
-                double avgSpeed = cursor.getDouble(cursor.getColumnIndex(DatabaseHelper.COLUMN_AVERAGE_SPEED));
-                double braking = cursor.getDouble(cursor.getColumnIndex(DatabaseHelper.COLUMN_SCORE_BRAKING));
-                double speeding = cursor.getDouble(cursor.getColumnIndex(DatabaseHelper.COLUMN_SCORE_SPEEDING));
-                double acceleration = cursor.getDouble(cursor.getColumnIndex(DatabaseHelper.COLUMN_SCORE_ACCELERATION));
-                double cornering = cursor.getDouble(cursor.getColumnIndex(DatabaseHelper.COLUMN_SCORE_CORNERING));
-                double overallScore = cursor.getDouble(cursor.getColumnIndex(DatabaseHelper.COLUMN_OVERALL_SCORE));
-
-                // Display trip data on the dashboard (you can update UI here)
-                // Example for displaying trip data in a simple TextView or RecyclerView
-
-            } while (cursor.moveToNext());
-            cursor.close();
-        }
+    // Example algorithm to calculate the overall driving score
+    private double calculateScore(double averageAcceleration, double averageBraking, double averageCornering) {
+        // A simple example algorithm (you can adjust the weights)
+        double score = 100 - (Math.abs(averageAcceleration) * 10) - (Math.abs(averageBraking) * 10) - (averageCornering * 5);
+        return Math.max(0, score); // Ensure score does not go below 0
     }
 
-    // Call this method when you want to end the trip
     @Override
-    protected void onStop() {
-        super.onStop();
-        endTrip();
+    protected void onDestroy() {
+        super.onDestroy();
+        if (locationManager != null) {
+            locationManager.removeUpdates(locationListener); // Stop location updates when activity is destroyed
+        }
     }
-
 }
