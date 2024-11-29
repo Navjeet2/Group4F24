@@ -9,6 +9,7 @@ import android.widget.Toast;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.group4f24.data.DatabaseHelper;
+import com.example.group4f24.util.CollectRealTimeActivity;
 import com.example.group4f24.util.HashingHelper;
 
 public class LoginActivity extends AppCompatActivity {
@@ -54,6 +55,9 @@ public class LoginActivity extends AppCompatActivity {
 
         if (HashingHelper.verifyPassword(password, storedPassword)) {
             Toast.makeText(this, "Login successful!", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(LoginActivity.this, CollectRealTimeActivity.class);
+            startActivity(intent);
+            finish(); // Close the current activity to prevent going back to it
             // Redirect to main screen
         } else {
             Toast.makeText(this, "Invalid email or password!", Toast.LENGTH_SHORT).show();

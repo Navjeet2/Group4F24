@@ -16,10 +16,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import com.example.group4f24.R;
+import com.example.group4f24.data.DatabaseHelper;
 
 public class CollectRealTimeActivity extends AppCompatActivity {
 
     private LocationManager locationManager;
+    private DatabaseHelper dbHelper;
     private double previousSpeed = 0;
     private long previousTime = 0;
     private double previousLatitude = 0;
@@ -36,8 +38,14 @@ public class CollectRealTimeActivity extends AppCompatActivity {
     private double totalSpeeding = 0;  // To accumulate speeding speed values
     private int speedingCount = 0;  // To count how many times the user was speeding
     private final double SPEEDING_THRESHOLD = 120.0;
-
     private boolean isTripActive = false;
+    private double averageSpeed;
+    private double averageAcceleration;
+    private double averageBraking;
+    private double averageCornering;
+    private double tripScore;
+
+    private int userId = 1; // Replace with dynamically fetched userId from the login session
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +55,11 @@ public class CollectRealTimeActivity extends AppCompatActivity {
 
         // Initialize the Start Trip button
         startTripButton = findViewById(R.id.start_trip);
+
+        // Initialize DatabaseHelper
+        dbHelper = new DatabaseHelper(this);
+
+        // Collect and save trip data
 
         // Set up the click listener for the "Start Trip" button
         startTripButton.setOnClickListener(new View.OnClickListener() {
@@ -104,6 +117,7 @@ public class CollectRealTimeActivity extends AppCompatActivity {
 
             // Convert speed to km/h (multiply by 3.6)
             double speedInKmh = currentSpeed * 3.6;
+
 
             // Update the TextView with the current speed
             if (scoreCircleTextView != null) {

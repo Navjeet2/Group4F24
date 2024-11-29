@@ -8,6 +8,11 @@
     android:layout_height="match_parent"
     android:background="#D9EAFF"
     tools:context=".util.CollectRealTimeActivity">
+    <View
+        android:id="@+id/top_bar"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="#02433A" />
 
     <LinearLayout
         android:id="@+id/profile_icon"
@@ -20,7 +25,7 @@
         <ImageView
             android:layout_width="250dp"
             android:layout_height="250dp"
-            android:layout_marginTop="13dp"
+            android:layout_marginTop="30dp"
             android:src="@drawable/profile" />
 
         <TextView
@@ -37,7 +42,7 @@
             android:id="@+id/score_circle"
             android:layout_width="150dp"
             android:layout_height="150dp"
-            android:layout_marginTop="30dp"
+            android:layout_marginTop="28dp"
             android:layout_gravity="center"
             android:background="@drawable/circle_shape"
             android:gravity="center"
@@ -61,7 +66,7 @@
             android:id="@+id/End_trip"
             android:layout_width="150dp"
             android:layout_height="50dp"
-            android:layout_marginTop="50dp"
+            android:layout_marginTop="38dp"
             android:background="@drawable/button_shape"
             android:text="End Trip"
             android:textAlignment="center"

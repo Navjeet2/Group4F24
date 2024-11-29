@@ -9,6 +9,12 @@
     android:background="#D9EAFF"
     tools:context=".util.CollectRealTimeActivity">
 
+    <View
+        android:id="@+id/top_bar"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="#02433A" />
+
     <LinearLayout
         android:id="@+id/profile_icon"
         android:layout_width="match_parent"

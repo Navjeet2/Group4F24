@@ -9,23 +9,24 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "user_management.db";
+    private static final int DATABASE_VERSION = 2;
     private static final String TABLE_USERS = "users";
     private static final String COLUMN_ID = "id";
     private static final String COLUMN_USERNAME = "username";
     private static final String COLUMN_EMAIL = "email";
     private static final String COLUMN_PASSWORD = "password";
 
+    // Trips table
     private static final String TABLE_TRIPS = "trips";
     private static final String COLUMN_TRIP_ID = "trip_id";
     private static final String COLUMN_USER_ID = "user_id";
-    private static final String COLUMN_START_TIME = "start_time";
-    private static final String COLUMN_END_TIME = "end_time";
-    private static final String COLUMN_AVERAGE_SPEED = "average_speed";
-    private static final String COLUMN_SCORE_BRAKING = "score_braking";
-    private static final String COLUMN_SCORE_SPEEDING = "score_speeding";
-    private static final String COLUMN_SCORE_ACCELERATION = "score_acceleration";
-    private static final String COLUMN_SCORE_CORNERING = "score_cornering";
-    private static final String COLUMN_OVERALL_SCORE = "overall_score";
+    private static final String COLUMN_SPEED = "speed";
+    private static final String COLUMN_ACCELERATION = "acceleration";
+    private static final String COLUMN_BRAKING = "braking";
+    private static final String COLUMN_CORNERING = "cornering";
+    private static final String COLUMN_TRIP_SCORE = "trip_score";
+    private static final String COLUMN_TIMESTAMP = "timestamp";
+
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, 1);
@@ -44,24 +45,26 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         String createTripsTable = "CREATE TABLE " + TABLE_TRIPS + " (" +
                 COLUMN_TRIP_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 COLUMN_USER_ID + " INTEGER NOT NULL, " +
-                COLUMN_START_TIME + " TEXT NOT NULL, " +
-                COLUMN_END_TIME + " TEXT, " +
-                COLUMN_AVERAGE_SPEED + " REAL, " +
-                COLUMN_SCORE_BRAKING + " REAL, " +
-                COLUMN_SCORE_SPEEDING + " REAL, " +
-                COLUMN_SCORE_ACCELERATION + " REAL, " +
-                COLUMN_SCORE_CORNERING + " REAL, " +
-                COLUMN_OVERALL_SCORE + " REAL, " +
-                "FOREIGN KEY (" + COLUMN_USER_ID + ") REFERENCES " + TABLE_USERS + "(" + COLUMN_ID + "))";
+                COLUMN_SPEED + " REAL NOT NULL, " +
+                COLUMN_ACCELERATION + " REAL NOT NULL, " +
+                COLUMN_BRAKING + " REAL NOT NULL, " +
+                COLUMN_CORNERING + " REAL NOT NULL, " +
+                COLUMN_TRIP_SCORE + " REAL NOT NULL, " +
+                COLUMN_TIMESTAMP + " TEXT NOT NULL, " +
+                "FOREIGN KEY(" + COLUMN_USER_ID + ") REFERENCES " + TABLE_USERS + "(" + COLUMN_ID + "))";
         db.execSQL(createTripsTable);
-
     }
+
+
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_USERS);
-        db.execSQL("DROP TABLE IF EXISTS "+ TABLE_TRIPS);
         onCreate(db);
+        if (oldVersion < 2) {
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_TRIPS);
+            onCreate(db);
+        }
     }
 
     public boolean addUser(String username, String email, String password) {
@@ -76,22 +79,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return result != -1;
     }
 
-    public boolean addTrip(int userId, String startTime, String endTime, float avgSpeed, float brakingScore, float accelScore, float cornerScore, float overallScore) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put(COLUMN_USER_ID, userId);
-        values.put(COLUMN_START_TIME, startTime);
-        values.put(COLUMN_END_TIME, endTime);
-        values.put(COLUMN_AVERAGE_SPEED, avgSpeed);
-        values.put(COLUMN_SCORE_BRAKING, brakingScore);
-        values.put(COLUMN_SCORE_ACCELERATION, accelScore);
-        values.put(COLUMN_SCORE_CORNERING, cornerScore);
-        values.put(COLUMN_OVERALL_SCORE, overallScore);
-
-        long result = db.insert("trips", null, values);
-        db.close();
-        return result != -1;
-    }
 
     public boolean checkUser(String email) {
         SQLiteDatabase db = this.getReadableDatabase();
@@ -117,38 +104,31 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return null;
     }
 
-    // Start a trip
-    public long startTrip(int userId, String startTime) {
+    // Add a method to insert trip data
+    public boolean addTrip(int userId, double speed, double acceleration, double braking, double cornering, double tripScore, String timestamp) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(COLUMN_USER_ID, userId);
-        values.put(COLUMN_START_TIME, startTime);
+        values.put(COLUMN_SPEED, speed);
+        values.put(COLUMN_ACCELERATION, acceleration);
+        values.put(COLUMN_BRAKING, braking);
+        values.put(COLUMN_CORNERING, cornering);
+        values.put(COLUMN_TRIP_SCORE, tripScore);
+        values.put(COLUMN_TIMESTAMP, timestamp);
 
         long result = db.insert(TABLE_TRIPS, null, values);
         db.close();
-        return result; // Returns the trip_id
+        return result != -1;
     }
 
-    // End a trip
-    public boolean endTrip(int tripId, String endTime, double avgSpeed, double braking, double speeding, double acceleration, double cornering) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put(COLUMN_END_TIME, endTime);
-        values.put(COLUMN_AVERAGE_SPEED, avgSpeed);
-        values.put(COLUMN_SCORE_BRAKING, braking);
-        values.put(COLUMN_SCORE_SPEEDING, speeding);
-        values.put(COLUMN_SCORE_ACCELERATION, acceleration);
-        values.put(COLUMN_SCORE_CORNERING, cornering);
-        values.put(COLUMN_OVERALL_SCORE, (braking + speeding + acceleration + cornering) / 4.0);
-
-        int result = db.update(TABLE_TRIPS, values, COLUMN_TRIP_ID + "=?", new String[]{String.valueOf(tripId)});
-        db.close();
-        return result > 0;
-    }
-    // Retrieve trip data for the dashboard
-    public Cursor getDashboardData(int userId) {
+    // Add a method to fetch trip data for a user
+    public Cursor getTripsForUser(int userId) {
         SQLiteDatabase db = this.getReadableDatabase();
-        return db.rawQuery("SELECT * FROM " + TABLE_TRIPS + " WHERE " + COLUMN_USER_ID + " = ?", new String[]{String.valueOf(userId)});
+        return db.query(TABLE_TRIPS, null, COLUMN_USER_ID + " = ?", new String[]{String.valueOf(userId)}, null, null, COLUMN_TIMESTAMP + " DESC");
     }
 }
+
+
+
+
 
