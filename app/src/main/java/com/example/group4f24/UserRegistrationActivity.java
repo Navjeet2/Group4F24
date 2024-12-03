@@ -9,6 +9,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.group4f24.data.DatabaseHelper;
+import com.example.group4f24.util.AccountInfoActivity;
 import com.example.group4f24.util.CollectRealTimeActivity;
 import com.example.group4f24.util.HashingHelper;
 
@@ -69,10 +70,11 @@ public class UserRegistrationActivity extends AppCompatActivity {
             Toast.makeText(this, "Registration successful!", Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(UserRegistrationActivity.this, CollectRealTimeActivity.class);
             startActivity(intent);
-            finish(); // Redirect to login screen
+            finish();
         } else {
             Toast.makeText(this, "Registration failed!", Toast.LENGTH_SHORT).show();
         }
+
     }
 
     private void navigateToLogin(){

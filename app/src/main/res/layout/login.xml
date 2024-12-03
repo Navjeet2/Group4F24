@@ -62,17 +62,7 @@
             android:textSize="20sp" />
 
 
-        <EditText
-            android:id="@+id/forget_password"
-            android:layout_width="189dp"
-            android:layout_height="48dp"
-            android:hint="@string/forget_password"
-            android:inputType="textPassword"
-            android:padding="10dp"
-            android:textColorHint="#454545"
-            android:textSize="20sp"
-            android:layout_marginStart="110dp"
-            android:background="@null"/>
+
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/login_screen"

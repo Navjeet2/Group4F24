@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/launching"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#D9EAFF"
+    tools:context=".util.LauncherPageActivity">
+
+    <!-- Blurred background image -->
+    <ImageView
+        android:id="@+id/background_image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        android:src="@drawable/launching_image"
+        android:alpha="0.5" />
+
+    <!-- Text overlay -->
+    <TextView
+        android:id="@+id/center_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Driver Analytics"
+        android:textSize="44sp"
+        android:textColor="#FFFFFF"
+        android:background="#80000000"
+        android:padding="16dp"
+        android:textStyle="bold"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:gravity="center" />
+</androidx.constraintlayout.widget.ConstraintLayout>

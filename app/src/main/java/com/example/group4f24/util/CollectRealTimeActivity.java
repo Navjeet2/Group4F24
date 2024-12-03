@@ -2,21 +2,31 @@ package com.example.group4f24.util;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.media.Image;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import com.example.group4f24.R;
 import com.example.group4f24.data.DatabaseHelper;
+import com.example.group4f24.util.AccountInfoActivity;
+
 
 public class CollectRealTimeActivity extends AppCompatActivity {
 
@@ -39,17 +49,14 @@ public class CollectRealTimeActivity extends AppCompatActivity {
     private int speedingCount = 0;  // To count how many times the user was speeding
     private final double SPEEDING_THRESHOLD = 120.0;
     private boolean isTripActive = false;
-    private double averageSpeed;
-    private double averageAcceleration;
-    private double averageBraking;
-    private double averageCornering;
-    private double tripScore;
+    private int tripId;
 
-    private int userId = 1; // Replace with dynamically fetched userId from the login session
+    private int userId; // Replace with dynamically fetched userId from the login session
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d("CollectRealTimeActivity", "Activity started successfully");
         // Set initial layout for the start trip
         setContentView(R.layout.first_page);  // This layout should have the Start Trip button
 
@@ -58,6 +65,14 @@ public class CollectRealTimeActivity extends AppCompatActivity {
 
         // Initialize DatabaseHelper
         dbHelper = new DatabaseHelper(this);
+
+        ImageView profileButton = findViewById(R.id.profile);
+        profileButton.setOnClickListener(view ->{
+            setContentView(R.layout.account_info);
+        });
+
+
+
 
         // Collect and save trip data
 
@@ -75,6 +90,22 @@ public class CollectRealTimeActivity extends AppCompatActivity {
                 scoreCircleTextView = findViewById(R.id.score_circle);
                 // Initialize the End Trip button
                 endTripButton = findViewById(R.id.End_trip);
+
+                ImageView backButton = findViewById(R.id.back_button);
+
+                // Set click listener
+                backButton.setOnClickListener(view -> {
+                    setContentView(R.layout.first_page); // Switch back to the first_page layout
+                });
+
+                ImageView profileButton = findViewById(R.id.profile);
+                profileButton.setOnClickListener(view ->{
+                    setContentView(R.layout.account_info);
+                });
+
+
+
+
 
                 // Set up the click listener for the "End Trip" button
                 endTripButton.setOnClickListener(new View.OnClickListener() {
@@ -121,7 +152,7 @@ public class CollectRealTimeActivity extends AppCompatActivity {
 
             // Update the TextView with the current speed
             if (scoreCircleTextView != null) {
-                scoreCircleTextView.setText(String.format("%.1f km/h", speedInKmh));  // Display speed in km/h
+                scoreCircleTextView.setText(String.format("%.1f ", speedInKmh));  // Display speed in km/h
             }
 
             // Calculate speeding events (if the speed exceeds the threshold)
@@ -158,8 +189,9 @@ public class CollectRealTimeActivity extends AppCompatActivity {
             previousLatitude = currentLatitude;
             previousLongitude = currentLongitude;
 
-            // Show real-time speed (for example in a Toast message)
-            //Toast.makeText(CollectRealTimeActivity.this, "Speed: " + currentSpeed + " m/s", Toast.LENGTH_SHORT).show();
+            // Save location data to the database
+            String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date(currentTime));
+            dbHelper.addLocation((int) tripId, currentLatitude, currentLongitude, timestamp);
         }
 
         @Override
@@ -187,18 +219,28 @@ public class CollectRealTimeActivity extends AppCompatActivity {
         isTripActive = false;
 
         // Calculate the average acceleration, braking, and cornering
-        double averageAcceleration = totalAcceleration / tripCount;
-        double averageBraking = totalBraking / tripCount;
-        double averageCornering = totalCornering / tripCount;
+        double averageAcceleration = (tripCount > 0) ? (totalAcceleration / tripCount) : 0.0;
+        double averageBraking = (tripCount > 0) ? (totalBraking / tripCount) : 0.0;
+        double averageCornering = (tripCount > 0) ? (totalCornering / tripCount) : 0.0;
 
         double averageSpeeding = (speedingCount > 0) ? totalSpeeding / speedingCount : 0;
 
         // Calculate the overall score (this is just an example formula)
         double score = calculateScore(averageAcceleration, averageBraking, averageCornering);
+        dbHelper.addScore(tripId, score);
         totalScore += score;
+
+        String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
+        boolean tripSaved = dbHelper.addTrip(userId, averageSpeeding, averageAcceleration, averageBraking, averageCornering, score, timestamp);
 
         // Show the final score in a Toast (or navigate to the Dashboard page)
         Toast.makeText(CollectRealTimeActivity.this, "Trip Ended. Your Score: " + score, Toast.LENGTH_LONG).show();
+
+        if (tripSaved) {
+            Toast.makeText(this, "Trip Saved. Score: " + score, Toast.LENGTH_LONG).show();
+        } else {
+            Toast.makeText(this, "Error saving trip.", Toast.LENGTH_LONG).show();
+        }
 
         setContentView(R.layout.dashboard);
         averageScoreTextView = findViewById(R.id.average_score_circle);
@@ -209,17 +251,40 @@ public class CollectRealTimeActivity extends AppCompatActivity {
 
 
         // Set the calculated values on the dashboard
-        averageScoreTextView.setText(String.format("%.1f", score));
-        brakingTextView.setText(String.format("%.1f", averageBraking));
-        speedingTextView.setText(String.format("%.1f", averageSpeeding));
-        accelerationTextView.setText(String.format("%.1f", averageAcceleration));
-        corneringTextView.setText(String.format("%.1f", averageCornering));
+        if (tripCount > 0) { // Ensure a trip was completed
+            averageScoreTextView.setText(String.format("%.1f", score));
+            brakingTextView.setText(String.format("%.1f", averageBraking));
+            speedingTextView.setText(String.format("%.1f", averageSpeeding));
+            accelerationTextView.setText(String.format("%.1f", averageAcceleration));
+            corneringTextView.setText(String.format("%.1f", averageCornering));
+        } else {
+            // Set default or placeholder values when no trip data exists
+            averageScoreTextView.setText("0.0");
+            brakingTextView.setText("0.0");
+            speedingTextView.setText("0.0");
+            accelerationTextView.setText("0.0");
+            corneringTextView.setText("0.0");
+        }
+
+
+        ImageView backButton = findViewById(R.id.back_button);
+
+        // Set click listener
+        backButton.setOnClickListener(view -> {
+            setContentView(R.layout.homepage); // Switch back to the first_page layout
+        });
+
+        ImageView profileButton = findViewById(R.id.profile);
+        profileButton.setOnClickListener(view ->{
+            setContentView(R.layout.account_info);
+        });
+
+
 
     }
 
     // Example algorithm to calculate the overall driving score
     private double calculateScore(double averageAcceleration, double averageBraking, double averageCornering) {
-        // A simple example algorithm (you can adjust the weights)
         double score = 100 - (Math.abs(averageAcceleration) * 10) - (Math.abs(averageBraking) * 10) - (averageCornering * 5);
         return Math.max(0, score); // Ensure score does not go below 0
     }

@@ -1,133 +1,142 @@
 package com.example.group4f24.util;
-import android.content.Intent;
+
+import android.database.Cursor;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.EditText;
+import android.text.InputType;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-public class AccountInfoActivity {
-    private FirebaseAuth auth;
-    private FirebaseUser currentUser;
+import android.widget.EditText;
+import android.database.Cursor;
 
-    private EditText usernameEditText, emailEditText, passwordEditText;
-    private TextView editUsername, editEmail, editPassword, logout, delete;
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.group4f24.R;
+import com.example.group4f24.data.DatabaseHelper;
+
+public class AccountInfoActivity extends AppCompatActivity {
+    private EditText editUsername, editEmail, editPassword;
+    private TextView editTextView1, editTextView2, editTextView3;
+    private DatabaseHelper dbHelper;
+    private String userEmail;  // Assume this is the email of the logged-in user
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.account_info);
 
-        // Initialize Firebase Auth
-        auth = FirebaseAuth.getInstance();
-        currentUser = auth.getCurrentUser();
+        ImageView backButton = findViewById(R.id.back_button);
 
+        // Set click listener
+        backButton.setOnClickListener(view -> {
+            setContentView(R.layout.dashboard); // Switch back to the first_page layout
+        });
+
+
+        dbHelper = new DatabaseHelper(this);
         // Initialize views
-        usernameEditText = findViewById(R.id.username);
-        emailEditText = findViewById(R.id.Email);
-        passwordEditText = findViewById(R.id.password);
-        editUsername = findViewById(R.id.edit_Text_View);
-        editEmail = findViewById(R.id.edit_Text_View2);
-        editPassword = findViewById(R.id.edit_Text_View3);
-        logout = findViewById(R.id.logout);
-        delete = findViewById(R.id.delete);
+        editUsername = findViewById(R.id.Change_Username);
+        editEmail = findViewById(R.id.Email);
+        editPassword = findViewById(R.id.Change_Password);
+        editTextView1 = findViewById(R.id.edit_Text_View);
+        editTextView2 = findViewById(R.id.edit_Text_View2);
+        editTextView3 = findViewById(R.id.edit_Text_View3);
+        dbHelper = new DatabaseHelper(this);
 
-        // Populate fields with user data
-        loadUserData();
+        // Get the email from the intent (passed from LoginActivity or UserRegistrationActivity)
+        userEmail = getIntent().getStringExtra("USER_EMAIL");
 
-        // Set up listeners for edit actions
-        editUsername.setOnClickListener(v -> editUsername());
-        editEmail.setOnClickListener(v -> editEmail());
-        editPassword.setOnClickListener(v -> editPassword());
 
-        // Set up listeners for logout and delete
-        logout.setOnClickListener(v -> logoutUser());
-        delete.setOnClickListener(v -> deleteAccount());
+        // If email is not found, show an error
+        if (userEmail == null) {
+            Toast.makeText(this, "Error: No logged-in user found.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Set the initial values from the database (optional)
+        loadUserInfo();
+
+        // Edit functionality
+        editTextView1.setOnClickListener(v -> enableEditMode(editUsername));
+        editTextView2.setOnClickListener(v -> enableEditMode(editEmail));
+        editTextView3.setOnClickListener(v -> enableEditMode(editPassword));
+
+        // Save changes to database
+        findViewById(R.id.save_changes).setOnClickListener(v -> updateAccountInfo());
     }
 
-    private void loadUserData() {
-        if (currentUser != null) {
-            emailEditText.setText(currentUser.getEmail());
-            // Assume username is stored in the user's display name
-            usernameEditText.setText(currentUser.getDisplayName());
+    private void loadUserInfo() {
+        // Retrieve user data from the database
+        Cursor cursor = dbHelper.getUserInfo(userEmail); // Fetch user info (username, email, password)
+
+        if (cursor != null && cursor.moveToFirst()) {
+            // Get column indices
+            int usernameIndex = cursor.getColumnIndex("username");
+            int emailIndex = cursor.getColumnIndex("email");
+            int passwordIndex = cursor.getColumnIndex("password");
+
+            // Check if the columns are valid
+            if (usernameIndex != -1 && emailIndex != -1 && passwordIndex != -1) {
+                // Retrieve values from the cursor
+                String username = cursor.getString(usernameIndex);
+                String email = cursor.getString(emailIndex);
+                String password = cursor.getString(passwordIndex);
+
+                // Set the fetched data into the EditText fields
+                editUsername.setText(username);
+                editEmail.setText(email);
+                editPassword.setText("••••••••");  // Show password as dots
+                editPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);  // Set password input type
+            } else {
+                Toast.makeText(this, "Error: Invalid column indices", Toast.LENGTH_SHORT).show();
+            }
+
+            cursor.close(); // Don't forget to close the cursor
         } else {
-            Toast.makeText(this, "No user signed in.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Error fetching user details.", Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void editUsername() {
-        String newUsername = usernameEditText.getText().toString().trim();
-        if (!newUsername.isEmpty()) {
-            currentUser.updateProfile(new UserProfileChangeRequest.Builder()
-                            .setDisplayName(newUsername)
-                            .build())
-                    .addOnCompleteListener(task -> {
-                        if (task.isSuccessful()) {
-                            Toast.makeText(this, "Username updated successfully.", Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(this, "Failed to update username: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
-                        }
-                    });
-        } else {
-            Toast.makeText(this, "Username cannot be empty.", Toast.LENGTH_SHORT).show();
+    private void enableEditMode(EditText editText) {
+        editText.setEnabled(true);  // Enable the EditText field for editing
+        editText.setFocusable(true);
+        editText.setFocusableInTouchMode(true);
+    }
+
+    private void updateAccountInfo() {
+        String newUsername = editUsername.getText().toString().trim();
+        String newEmail = editEmail.getText().toString().trim();
+        String newPassword = editPassword.getText().toString().trim();
+
+        // Validate inputs before updating
+        if (newUsername.isEmpty() || newEmail.isEmpty() || newPassword.isEmpty()) {
+            Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
+            return;
         }
-    }
 
-    private void editEmail() {
-        String newEmail = emailEditText.getText().toString().trim();
-        if (!newEmail.isEmpty()) {
-            currentUser.updateEmail(newEmail)
-                    .addOnCompleteListener(task -> {
-                        if (task.isSuccessful()) {
-                            Toast.makeText(this, "Email updated successfully.", Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(this, "Failed to update email: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
-                        }
-                    });
-        } else {
-            Toast.makeText(this, "Email cannot be empty.", Toast.LENGTH_SHORT).show();
+        int userId = dbHelper.getUserIdByEmail(userEmail);
+
+        // Check if userId is valid
+        if (userId == -1) {
+            Toast.makeText(this, "User not found.", Toast.LENGTH_SHORT).show();
+            return;
         }
-    }
 
-    private void editPassword() {
-        String newPassword = passwordEditText.getText().toString().trim();
-        if (!newPassword.isEmpty()) {
-            currentUser.updatePassword(newPassword)
-                    .addOnCompleteListener(task -> {
-                        if (task.isSuccessful()) {
-                            Toast.makeText(this, "Password updated successfully.", Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(this, "Failed to update password: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
-                        }
-                    });
+        // Generate a timestamp (or use current time)
+        String timestamp = String.valueOf(System.currentTimeMillis());
+        // Update the user's info in the database
+        boolean isUpdated = dbHelper.updateUserInfo(userEmail, newUsername, newEmail, newPassword);
+        if (isUpdated) {
+            // Record the update in the logs (or user updates table) using addUserUpdate
+            dbHelper.addUserUpdate(userId,userEmail, newUsername, newEmail, newPassword);
+            Toast.makeText(this, "Account information updated successfully", Toast.LENGTH_SHORT).show();
+
+            loadUserInfo();
         } else {
-            Toast.makeText(this, "Password cannot be empty.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Failed to update account information", Toast.LENGTH_SHORT).show();
         }
-    }
 
-    private void logoutUser() {
-        auth.signOut();
-        Intent intent = new Intent(AccountInfoActivity.this, LoginActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
-        finish();
-    }
-
-    private void deleteAccount() {
-        currentUser.delete()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        Toast.makeText(this, "Account deleted successfully.", Toast.LENGTH_SHORT).show();
-                        Intent intent = new Intent(AccountInfoActivity.this, LoginActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);
-                        finish();
-                    } else {
-                        Toast.makeText(this, "Failed to delete account: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
-                    }
-                });
     }
 }

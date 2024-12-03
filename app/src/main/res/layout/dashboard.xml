@@ -15,6 +15,7 @@
         android:layout_height="50dp"
         android:background="#02433A" />
 
+
     <LinearLayout
         android:id="@+id/profile_icon"
         android:layout_width="match_parent"
@@ -22,13 +23,34 @@
         android:gravity="center"
         android:orientation="vertical">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <ImageView
+                android:id="@+id/back_button"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:contentDescription="Back"
+                android:layout_marginEnd="330dp"
+                android:src="@drawable/ic_back" />
+
+            <ImageView
+                android:id="@+id/profile"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:contentDescription="Back"
+                android:src="@drawable/profile_ic" />
+
+
+        </LinearLayout>
+
 
         <TextView
             android:id="@+id/Score_page"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="35dp"
             android:gravity="center"
-            android:layout_marginTop="75dp"
             android:text="@string/score"
             android:textColor="#000000"
             android:textSize="30sp"
@@ -38,8 +60,8 @@
             android:id="@+id/average_score_circle"
             android:layout_width="150dp"
             android:layout_height="150dp"
-            android:layout_marginTop="30dp"
             android:layout_gravity="center"
+            android:layout_marginTop="30dp"
             android:background="@drawable/circle_shape"
             android:gravity="center"
             android:text="0"
@@ -52,9 +74,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
+            android:layout_marginBottom="15dp"
             android:gravity="center"
             android:text="@string/average_overall_score"
-            android:layout_marginBottom="15dp"
             android:textColor="#000000"
             android:textSize="25sp"
             android:textStyle="bold" />
@@ -71,8 +93,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:gravity="center"
                 android:layout_marginEnd="119dp"
+                android:gravity="center"
                 android:text="Braking"
                 android:textColor="#000000"
                 android:textSize="25sp"
@@ -105,18 +127,19 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
+                android:layout_marginEnd="105dp"
                 android:gravity="center"
                 android:text="Speeding"
-                android:layout_marginEnd="105dp"
                 android:textColor="#000000"
                 android:textSize="25sp"
                 android:textStyle="bold" />
+
             <TextView
                 android:id="@+id/speeding_circle"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
-                android:layout_margin="10dp"
                 android:layout_gravity="center"
+                android:layout_margin="10dp"
                 android:background="@drawable/circle_shape"
                 android:gravity="center"
                 android:text="0"
@@ -125,6 +148,7 @@
                 android:textStyle="bold" />
 
         </LinearLayout>
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -137,18 +161,19 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
+                android:layout_marginEnd="70dp"
                 android:gravity="center"
                 android:text="Acceleration"
-                android:layout_marginEnd="70dp"
                 android:textColor="#000000"
                 android:textSize="25sp"
                 android:textStyle="bold" />
+
             <TextView
                 android:id="@+id/accelerate_circle"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
-                android:layout_margin="10dp"
                 android:layout_gravity="center"
+                android:layout_margin="10dp"
                 android:background="@drawable/circle_shape"
                 android:gravity="center"
                 android:text="0"
@@ -157,6 +182,7 @@
                 android:textStyle="bold" />
 
         </LinearLayout>
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -168,18 +194,19 @@
                 android:id="@+id/cornering"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginEnd="100dp"
                 android:gravity="center"
                 android:text="Cornering"
-                android:layout_marginEnd="100dp"
                 android:textColor="#000000"
                 android:textSize="25sp"
                 android:textStyle="bold" />
+
             <TextView
                 android:id="@+id/cornering_circle"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
-                android:layout_margin="10dp"
                 android:layout_gravity="center"
+                android:layout_margin="10dp"
                 android:background="@drawable/circle_shape"
                 android:gravity="center"
                 android:text="0"
@@ -201,14 +228,14 @@
             android:id="@+id/bottom_navigation"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
             android:layout_alignParentBottom="true"
+            android:layout_marginTop="128dp"
             android:background="#02433A"
             app:itemIconTint="@null"
-            app:labelVisibilityMode="labeled"
             app:itemTextAppearanceActive="@style/BottomNavigationTextStyle"
             app:itemTextAppearanceInactive="@style/BottomNavigationTextStyle"
             app:itemTextColor="@color/white"
+            app:labelVisibilityMode="labeled"
             app:menu="@menu/botton_nav_menu" />
 
 

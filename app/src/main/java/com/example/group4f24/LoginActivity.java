@@ -3,18 +3,19 @@ package com.example.group4f24;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.group4f24.data.DatabaseHelper;
+import com.example.group4f24.util.AccountInfoActivity;
 import com.example.group4f24.util.CollectRealTimeActivity;
 import com.example.group4f24.util.HashingHelper;
 
 public class LoginActivity extends AppCompatActivity {
     private EditText emailField, passwordField;
-    protected EditText forget_passwordField;
     protected TextView signupField;
     protected Button loginButton;
     private DatabaseHelper databaseHelper;
@@ -24,11 +25,12 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login);
+        Log.d("LoginActivity", "Navigating to CollectRealTimeActivity");
         databaseHelper = new DatabaseHelper(this);
+
 
         emailField = findViewById(R.id.Email);
         passwordField = findViewById(R.id.Enter_Password);
-        forget_passwordField= findViewById(R.id.forget_password);
         loginButton = findViewById(R.id.login_screen);
         signupField = findViewById(R.id.Signup);
 
@@ -54,14 +56,14 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         if (HashingHelper.verifyPassword(password, storedPassword)) {
-            Toast.makeText(this, "Login successful!", Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(LoginActivity.this, CollectRealTimeActivity.class);
-            startActivity(intent);
-            finish(); // Close the current activity to prevent going back to it
-            // Redirect to main screen
+                Toast.makeText(this, "Login successful!", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(LoginActivity.this, CollectRealTimeActivity.class);
+                startActivity(intent);
+                finish(); // Close the current activity to prevent going back to it
         } else {
             Toast.makeText(this, "Invalid email or password!", Toast.LENGTH_SHORT).show();
         }
+
     }
     private  void navigateToSignup(){
         Intent intent= new Intent(LoginActivity.this, UserRegistrationActivity.class);

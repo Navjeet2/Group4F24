@@ -15,6 +15,18 @@
         android:layout_height="50dp"
         android:background="#02433A" />
 
+
+    <ImageView
+            android:id="@+id/profile"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="370dp"
+            android:contentDescription="Back"
+            android:src="@drawable/profile_ic" />
+
+
+
+
     <LinearLayout
         android:id="@+id/profile_icon"
         android:layout_width="match_parent"
@@ -33,6 +45,7 @@
             android:id="@+id/first_page_welcome"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="40dp"
             android:gravity="center"
             android:text="@string/welcome_to_driveranalytics"
             android:textColor="#000000"
@@ -41,17 +54,6 @@
 
 
 
-        <TextView
-            android:id="@+id/start_trip_message"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="40dp"
-            android:background="@drawable/border"
-            android:gravity="center"
-            android:text="Start your journey to see driving scores!"
-            android:textColor="#000000"
-            android:textSize="25sp"
-            android:textStyle="bold" />
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/start_trip"
@@ -70,9 +72,9 @@
             android:id="@+id/safe_message"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="40dp"
+            android:layout_marginTop="60dp"
             android:gravity="center"
-            android:text="Drive smarter. Stay safer."
+            android:text="Drive Smarter. Stay Safer."
             android:textColor="#000000"
             android:textSize="25sp"
             android:textStyle="bold" />
@@ -87,7 +89,7 @@
             android:id="@+id/bottom_navigation"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="28dp"
+            android:layout_marginTop="190dp"
             android:layout_alignParentBottom="true"
             android:background="#02433A"
             app:itemIconTint="@null"
