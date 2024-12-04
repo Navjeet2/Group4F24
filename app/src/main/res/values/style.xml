@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="BottomNavigationTextStyle" parent="TextAppearance.AppCompat.Caption">
+        <item name="android:textSize">20sp</item> <!-- Set your desired text size -->
+        <item name="android:textColor">@color/white</item> <!-- Optional: Set text color -->
+    </style>
+
+</resources>
